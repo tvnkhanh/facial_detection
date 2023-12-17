@@ -14,24 +14,23 @@ emotion_model = model_from_json(loaded_model_json)
 
 # load weights into new model
 emotion_model.load_weights("model/emotion_model.h5")
-print("Loaded model from disk")
 
 # start the webcam feed
 cap = cv2.VideoCapture(0)
 
 # detection in video
-# cap = cv2.VideoCapture(r"pexels-gabby-k-5273028 (2160p).mp4")
+# cap = cv2.VideoCapture(r"video_of_people_walking (1080p).mp4")
 
 while True:
     ret, frame = cap.read()
-    frame = cv2.resize(frame, (1280, 720))
+    frame = cv2.resize(frame, (640, 480))
     if not ret:
         break
     cascade_path = pathlib.Path(cv2.__file__).parent.absolute() / "data/haarcascade_frontalface_default.xml"
     face_detector = cv2.CascadeClassifier(str(cascade_path))
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    num_faces = face_detector.detectMultiScale(gray_frame, scaleFactor=1.3, minNeighbors=5)
+    num_faces = face_detector.detectMultiScale(gray_frame)
 
     for (x, y, w, h) in num_faces:
         cv2.rectangle(frame, (x, y-50), (x+w, y+h+10), (0, 255, 0), 4)
@@ -43,7 +42,8 @@ while True:
         cv2.putText(frame, emotion_dict[maxindex], (x+5, y-20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
     cv2.imshow('Emotion Detection', frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    k = cv2.waitKey(1)
+    if k == 27:  # Break when escape button is pressed
         break
 
 cap.release()
